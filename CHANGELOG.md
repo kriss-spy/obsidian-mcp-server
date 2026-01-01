@@ -20,6 +20,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Installed all dependencies (313 packages)
 - Built project successfully
 - Reviewed existing codebase structure
+- Example vaults extracted (Blue-topaz-example-main, Pkmer-Math-main)
+- Manual vault setup documentation created (MANUAL_VAULT_SETUP.md)
+- Automated vaults setup script created (scripts/setup-vaults.sh)
+- Fixtures directory structure created (tests/fixtures/sample-vaults/)
+- Manual vault setup required (commands failed during automation)
 
 ### Deprecated
 - N/A
