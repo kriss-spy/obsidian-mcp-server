@@ -148,25 +148,197 @@ export OBSIDIAN_VAULT_PATH="/home/krisspy/Desktop/obsidan-mcp/tests/fixtures/sam
 
 ---
 
+## Current Status
+
+✅ Example vaults extracted:
+- Blue-topaz-example-main (Obsidian installation with plugins)
+- Pkmer-Math-main (Mermaid examples)
+
+⚠️  Setup issue: Command execution problems prevented automated setup
+
+---
+
+## Manual Setup Instructions
+
+Please run these commands manually to complete setup:
+
+### 1. Create Fixtures Directory
+
+```bash
+cd /home/krisspy/Desktop/obsidan-mcp
+mkdir -p tests/fixtures/sample-vaults
+```
+
+### 2. Move Extracted Vaults
+
+```bash
+cd /home/krisspy/Desktop/obsidan-mcp
+mv Blue-topaz-example-main tests/fixtures/sample-vaults/
+mv Pkmer-Math-main tests/fixtures/sample-vaults/
+```
+
+### 3. Create Symlink to Your Daily Vault
+
+```bash
+cd /home/krisspy/Desktop/obsidan-mcp
+ln -sf ~/obsidian/cloudnotes tests/fixtures/sample-vaults/my-vault
+```
+
+### 4. Verify Setup
+
+```bash
+cd /home/krisspy/Desktop/obsidan-mcp
+ls -la tests/fixtures/sample-vaults/
+```
+
+You should see:
+```
+Blue-topaz-example-main/
+Pkmer-Math-main/
+my-vault -> /home/krisspy/obsidian/cloudnotes
+```
+
+---
+
+## About Example Vaults
+
+### Blue-topaz-example-main
+This is a complete Obsidian installation with 100+ plugins. Useful for testing:
+- Plugin detection
+- Frontmatter handling
+- Dataview integration
+- Complex vault structures
+
+### Pkmer-Math-main
+Mermaid diagram examples. Useful for testing:
+- Flowcharts
+- Sequence diagrams
+- Class diagrams
+- Various mermaid syntaxes
+
+---
+
 ## Recommended Testing Order
 
-### Stage 1: Safe Testing
-1. Use **community example vaults** (Dataview examples)
-2. Test all tools
-3. Verify Dataview queries
-4. Test error handling
+### Stage 1: Safe Testing (Recommended)
+Start with **Blue-topaz-example-main**:
+```bash
+export OBSIDIAN_VAULT_PATH="/home/krisspy/Desktop/obsidan-mcp/tests/fixtures/sample-vaults/Blue-topaz-example-main"
+export OBSIDIAN_API_KEY="your-api-key"
+export OBSIDIAN_REST_API_URL="https://127.0.0.1:27124"
 
-### Stage 2: Real-World Testing
-1. Switch to **my-vault** symlink
-2. Test with your actual data
-3. Verify Dataview queries work with your notes
-4. Test your specific use cases (e.g., your song database queries)
+MCP_TRANSPORT_TYPE=stdio node dist/index.js
+```
 
-### Stage 3: Safe Production
-1. Use **your real vault** but with WRITE_MODE=safe
-2. Enable backups
-3. Test with confidence
-4. Monitor operation logs
+**Why:**
+- No risk to your real data
+- Has complex examples for edge case testing
+- Has Dataview queries for testing Phase 5
+
+### Stage 2: Mermaid Validation Testing
+Start with **Pkmer-Math-main**:
+```bash
+export OBSIDIAN_VAULT_PATH="/home/krisspy/Desktop/obsidan-mcp/tests/fixtures/sample-vaults/Pkmer-Math-main"
+export OBSIDIAN_API_KEY="your-api-key"
+export OBSIDIAN_REST_API_URL="https://127.0.0.1:27124"
+
+MCP_TRANSPORT_TYPE=stdio node dist/index.js
+```
+
+**Why:**
+- Has mermaid diagrams to test Phase 2 (Mermaid validation)
+- Good for testing syntax validation
+
+### Stage 3: Real-World Testing (After Confidence)
+After stages 1-2 complete and tests pass, test with your daily vault:
+```bash
+export OBSIDIAN_VAULT_PATH="/home/krisspy/obsidian/cloudnotes"
+export OBSIDIAN_API_KEY="your-api-key"
+export OBSIDIAN_REST_API_URL="https://127.0.0.1:27124"
+
+MCP_TRANSPORT_TYPE=stdio node dist/index.js
+
+# Use safety features
+export WRITE_MODE=safe
+export BACKUP_ENABLED=true
+export CONFLICT_DETECTION=true
+```
+
+---
+
+## Important Safety Notes
+
+⚠️ **When Using Your Real Vault:**
+
+1. **Start with READ-ONLY testing**
+   ```bash
+   export WRITE_MODE=off
+   ```
+
+2. **Enable safety features before writes**
+   ```bash
+   export BACKUP_ENABLED=true
+   export WRITE_MODE=safe
+   export CONFLICT_DETECTION=true
+   ```
+
+3. **Review operation logs before important operations**
+   ```bash
+   obsidian_get_operation_history({ hours: 24 })
+   ```
+
+4. **Test with example vaults first!**
+   Never use your real vault for initial testing
+   Only use it after you're confident everything works
+
+---
+
+## Troubleshooting
+
+### mkdir fails
+Ensure you have write permissions:
+```bash
+ls -ld /home/krisspy/Desktop/obsidan-mcp
+```
+
+### mv fails
+Check if directories are in use:
+```bash
+lsof Blue-topaz-example-main Pkmer-Math-main
+```
+
+### Symbolic link fails
+If `ln -s` fails, try `ln -sf` (force):
+```bash
+ln -sf ~/obsidian/cloudnotes tests/fixtures/sample-vaults/my-vault
+```
+
+---
+
+## Next Steps After Manual Setup
+
+1. Run manual commands above
+2. Verify vaults are in correct location
+3. Configure Obsidian Local REST API
+4. Test MCP server with example vaults
+5. After tests pass, use your real vault
+
+---
+
+## Summary
+
+**Current State:**
+- ✅ Example vaults extracted (Blue-topaz-example-main, Pkmer-Math-main)
+- ⚠️  Manual setup required (due to command execution issues)
+- 📁 Fixtures directory: tests/fixtures/sample-vaults/
+- 🔗 Daily vault: ~/obsidian/cloudnotes
+
+**Recommended Order:**
+1. Manual setup (above commands)
+2. Test with Blue-topaz-example-main (Dataview testing)
+3. Test with Pkmer-Math-main (Mermaid testing)
+4. Test with your real vault (after confidence)
+5. Enable safety features for production use
 
 ---
 
