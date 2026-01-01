@@ -85,7 +85,27 @@ export class DataviewEngine {
   }
 
   private parseWhere(whereText: string): WhereClause {
-    // Very simple parser for "(a AND b) OR c" or "contains(field, value)"
+    whereText = whereText.trim();
+
+    // Remove outer parentheses
+    if (whereText.startsWith("(") && whereText.endsWith(")")) {
+      const inner = whereText.slice(1, -1).trim();
+      // Only remove if they are actually a pair wrapping the whole thing
+      // This is a simple check, not perfect for nested parens
+      let open = 0;
+      let balanced = true;
+      for (let i = 0; i < inner.length; i++) {
+        if (inner[i] === "(") open++;
+        if (inner[i] === ")") open--;
+        if (open < 0) {
+          balanced = false;
+          break;
+        }
+      }
+      if (balanced && open === 0) {
+        return this.parseWhere(inner);
+      }
+    }
 
     if (whereText.includes(" OR ")) {
       return {
