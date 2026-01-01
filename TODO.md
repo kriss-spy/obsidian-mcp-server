@@ -184,3 +184,7 @@ x
 
 **Status:** ✅ Phase 0 Complete! Ready for Phase 1
 **Next Step:** Begin Phase 1: HTML Rendering
+
+- [ ] Manual vaults setup complete
+- [ ] Vault testing ready: Blue-topaz-example-main (Dataview), Pkmer-Math-main (Mermaid)
+- [ ] Daily vault symlink ready: tests/fixtures/sample-vaults/my-vault
