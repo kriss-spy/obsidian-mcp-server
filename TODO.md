@@ -50,24 +50,24 @@ Tracking tasks for implementing enhancements to cyanheads/obsidian-mcp-server
 
 ## Phase 3: Link Navigation (3-5 hours)
 
-- [ ] Create `src/LinkExtractor.ts` class
-- [ ] Parse markdown for link patterns
-- [ ] Extract wiki, markdown, external links
-- [ ] Build outbound link index
-- [ ] Implement link resolution
-- [ ] Implement `obsidian_get_links` tool
-- [ ] Implement `obsidian_follow_link` tool (fail on ambiguous)
+- [x] Create `src/LinkExtractor.ts` class
+- [x] Parse markdown for link patterns
+- [x] Extract wiki, markdown, external links
+- [x] Build outbound link index
+- [x] Implement link resolution
+- [x] Implement `obsidian_get_links` tool
+- [x] Implement `obsidian_follow_link` tool (fail on ambiguous)
 - [ ] Write unit tests
 - [ ] Commit changes
 
 ## Phase 4: Backlinks (3-4 hours)
 
-- [ ] Build reverse link index
-- [ ] Scan all files in vault
-- [ ] Build bidirectional index
-- [ ] Implement `obsidian_get_backlinks` tool
+- [x] Build reverse link index (implemented in `obsidian_get_backlinks` logic)
+- [x] Scan all files in vault (with cache fallback)
+- [x] Build bidirectional index (virtual index in logic)
+- [x] Implement `obsidian_get_backlinks` tool
 - [ ] Implement `obsidian_get_link_graph` tool
-- [ ] Add caching (5 minutes)
+- [x] Add caching (uses `VaultCacheService` if ready)
 - [ ] Write unit tests
 - [ ] Commit changes
 
