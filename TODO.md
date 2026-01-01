@@ -84,15 +84,15 @@ Tracking tasks for implementing enhancements to cyanheads/obsidian-mcp-server
 
 ## Phase 6: Documentation (3-4 hours)
 
-- [ ] Update README.md with new tools
-- [ ] Document Dataview syntax
-- [ ] Add limitations section
+- [x] Update README.md with new tools
+- [x] Document Dataview syntax (handled in README summary)
+- [x] Add limitations section (handled in README summary)
 - [ ] Create troubleshooting guide
 - [ ] Create example queries
-- [ ] Document safety features
-- [ ] Document rate limiting
-- [ ] Document backup system
-- [ ] Create configuration examples
+- [x] Document safety features (added to README)
+- [x] Document rate limiting (added to README)
+- [x] Document backup system (added to README)
+- [x] Create configuration examples (added to README)
 - [ ] Commit changes
 
 ## Phase 7: Testing (4-6 hours)
