@@ -6,3 +6,5 @@ export * from "./obsidianApiUtils.js";
 export * from "./MarkdownRenderer.js";
 export * from "./MermaidValidator.js";
 export * from "./LinkExtractor.js";
+export * from "./VaultIndexer.js";
+export * from "./DataviewEngine.js";

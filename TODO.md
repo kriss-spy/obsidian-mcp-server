@@ -73,12 +73,12 @@ Tracking tasks for implementing enhancements to cyanheads/obsidian-mcp-server
 
 ## Phase 5: Dataview Engine (10-14 hours)
 
-- [ ] Install dependency: `npm install js-yaml`
-- [ ] Create `src/VaultIndexer.ts` class
-- [ ] Create `src/QueryParser.ts` class
-- [ ] Create `src/QueryExecutor.ts` class
-- [ ] Implement `obsidian_execute_dataview` tool
-- [ ] Add debug mode
+- [x] Install dependency: `npm install js-yaml`
+- [x] Create `src/VaultIndexer.ts` class
+- [x] Create `src/QueryParser.ts` class (implemented in `DataviewEngine.ts`)
+- [x] Create `src/QueryExecutor.ts` class (implemented in `DataviewEngine.ts`)
+- [x] Implement `obsidian_execute_dataview` tool
+- [x] Add debug mode
 - [ ] Write unit tests
 - [ ] Commit changes
 
