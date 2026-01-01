@@ -4,75 +4,42 @@ All notable changes to obsidian-mcp will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.0.0] - 2026-01-01
 
 ### Added
-- Project initialization with planning documents
-- Git repository initialized
-- Project directory structure created
-- Phase 0 setup instructions created (PHASE_0_SETUP.md)
+
+- **HTML Rendering**: New tool `obsidian_render_html` using `markdown-it` and `highlight.js` for syntax highlighting.
+- **Mermaid Support**: New tool `obsidian_validate_mermaid` for diagram syntax validation and SVG generation via `mermaid-cli`.
+- **LSP Features**:
+  - `obsidian_get_links`: Extract all links and resolve them to absolute paths.
+  - `obsidian_follow_link`: Resolve and read linked notes.
+  - `obsidian_get_symbols`: Extract heading structure with line numbers.
+- **Backlinks**: `obsidian_get_backlinks` for reverse link discovery across the entire vault.
+- **Dataview Engine**: `obsidian_execute_dataview` supports LIST and TABLE queries with `WHERE`, `SORT`, `LIMIT`, and `contains()` support.
+- **Safety Layer**:
+  - Automatic file-based backups before every write operation.
+  - Conflict detection based on modification time (30s window).
+  - Sync awareness with configurable buffer.
+  - Audit logging of all agent write operations.
+  - Tools: `obsidian_set_write_mode`, `obsidian_get_operation_history`, `obsidian_undo_operation`, `obsidian_emergency_stop`.
 
 ### Changed
-- Forked cyanheads/obsidian-mcp-server to kriss-spy account
-- Cloned fork to local repository
-- Added upstream remote to original repository
-- Created feature/html-rendering branch
-- Installed all dependencies (313 packages)
-- Built project successfully
-- Reviewed existing codebase structure
-- Example vaults extracted (Blue-topaz-example-main, Pkmer-Math-main)
-- Manual vault setup documentation created (MANUAL_VAULT_SETUP.md)
-- Automated vaults setup script created (scripts/setup-vaults.sh)
-- Fixtures directory structure created (tests/fixtures/sample-vaults/)
-- Manual vault setup required (commands failed during automation)
 
-### Deprecated
-- N/A
-
-### Removed
-- N/A
+- Default write mode set to `safe` (backups + conflict checks).
+- Project structure updated for modular tool registration.
+- Enhanced configuration with comprehensive environment variable validation.
+- Improved file path resolution for wiki-links and short paths.
 
 ### Fixed
-- N/A
 
-### Security
-- N/A
-
----
-
-## [1.0.0] - Planned
-
-### Added
-- HTML rendering with `obsidian_render_html` tool
-- Mermaid validation with `obsidian_validate_mermaid` tool
-- Link navigation with `obsidian_get_links` and `obsidian_follow_link` tools
-- Backlinks with `obsidian_get_backlinks` and `obsidian_get_link_graph` tools
-- Dataview query engine with `obsidian_execute_dataview` tool
-- Safety layer with:
-  - `obsidian_set_write_mode` tool
-  - `obsidian_get_operation_history` tool
-  - `obsidian_undo_operation` tool
-  - `obsidian_emergency_stop` tool
-
-### Changed
-- Default write mode: `safe` (backups + conflict checks)
-- File-based backups (no git conflicts)
-- Operation logging: 30-day retention
-- Agent query window: 7 days
-- Rate limiting: OFF by default
-
-### Security
-- Automatic backups before all writes
-- Conflict detection (strict: don't write if conflicts exist)
-- Sync awareness (60-second buffer)
-- Write protection modes: off, safe, confirm, full
-- Emergency stop capability
-- Operation history with undo
+- Fixed environment variable loading issues with a dedicated `.env` template and startup script.
+- Fixed merge conflict issues by using fresh clone approach during initialization.
 
 ---
 
-## [0.0.0] - Not Released
+## [0.0.0] - 2026-01-01
 
 ### Notes
-- Fork of cyanheads/obsidian-mcp-server
-- Initial project setup
+
+- Forked from `cyanheads/obsidian-mcp-server`.
+- Initial project planning and setup.
