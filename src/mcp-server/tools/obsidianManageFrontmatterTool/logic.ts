@@ -11,6 +11,7 @@ import {
   logger,
   RequestContext,
   retryWithDelay,
+  safetyManager,
 } from "../../../utils/index.js";
 
 // ====================================================================================
@@ -88,6 +89,17 @@ export const processObsidianManageFrontmatter = async (
   });
 
   const { filePath, operation, key, value } = params;
+
+  // --- Step 0: Safety Check ---
+  if (operation === "set" || operation === "delete") {
+    await safetyManager.validateWrite(
+      "PATCH",
+      filePath,
+      undefined,
+      context,
+      obsidianService,
+    );
+  }
 
   const shouldRetryNotFound = (err: unknown) =>
     err instanceof McpError && err.code === BaseErrorCode.NOT_FOUND;

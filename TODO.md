@@ -146,10 +146,42 @@ Tracking tasks for implementing enhancements to cyanheads/obsidian-mcp-server
 
 ### 8.1 Setup Safety Infrastructure (2-3 hours)
 
-- [ ] Add safety configuration to env vars
-- [ ] Create backup directory structure
-- [ ] Setup operation logging
-- [ ] Create lock file manager
+- [x] Add safety configuration to env vars
+- [x] Create backup directory structure (handled in `SafetyManager.ts`)
+- [x] Setup operation logging
+- [x] Create lock file manager (virtual locks in `SafetyManager.ts`)
+- [x] Commit changes
+
+### 8.2 Implement Write Protection (3-4 hours)
+
+- [x] Implement write modes (off, safe, confirm, full)
+- [x] Implement conflict detection
+- [x] Implement sync awareness
+- [x] Implement rate limiting (default OFF)
+- [x] Integrate safety checks in all write tools
+- [x] Commit changes
+
+### 8.3 Add Safety Tools (2-3 hours)
+
+- [x] Implement `obsidian_set_write_mode` tool
+- [x] Implement `obsidian_get_operation_history` tool
+- [x] Implement `obsidian_undo_operation` tool
+- [x] Implement `obsidian_emergency_stop` tool
+- [x] Commit changes
+
+### 8.4 Add Logging & Backup (2-3 hours)
+
+- [x] Implement operation logging
+- [x] Implement backup before write
+- [x] Implement backup query interface
+- [x] Implement automatic cleanup
+- [x] Commit changes
+
+### 8.5 Tests (1-2 hours)
+
+- [ ] Write unit tests for safety logic
+- [ ] Write unit tests for safety tools
+- [ ] Test backup/restore
 - [ ] Commit changes
 
 ### 8.2 Implement Write Protection (3-4 hours)

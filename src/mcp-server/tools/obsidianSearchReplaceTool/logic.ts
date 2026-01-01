@@ -11,6 +11,7 @@ import {
   logger,
   RequestContext,
   retryWithDelay,
+  safetyManager,
 } from "../../../utils/index.js";
 
 // ====================================================================================
@@ -350,6 +351,33 @@ export const processObsidianSearchReplace = async (
     wholeWord,
     returnContent,
   });
+
+  // --- Step 0: Safety Check ---
+  let resolvedFilePath = targetIdentifier;
+  if (targetType === "activeFile") {
+    const activeFile = (await obsidianService.getActiveFile(
+      "json",
+      context,
+    )) as NoteJson;
+    resolvedFilePath = activeFile.path;
+  } else if (targetType === "periodicNote" && targetPeriod) {
+    const periodicNote = (await obsidianService.getPeriodicNote(
+      targetPeriod,
+      "json",
+      context,
+    )) as NoteJson;
+    resolvedFilePath = periodicNote.path;
+  }
+
+  if (resolvedFilePath) {
+    await safetyManager.validateWrite(
+      "PATCH",
+      resolvedFilePath,
+      undefined, // We don't have the final content yet
+      context,
+      obsidianService,
+    );
+  }
 
   // --- Step 1: Read Initial Content (with case-insensitive fallback for filePath) ---
   let originalContent: string;

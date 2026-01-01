@@ -104,6 +104,30 @@ const EnvSchema = z.object({
     .int()
     .positive()
     .default(30000),
+  // --- Safety Config ---
+  WRITE_MODE: z.enum(["off", "safe", "confirm", "full"]).default("safe"),
+  BACKUP_ENABLED: z
+    .string()
+    .transform((val) => val.toLowerCase() === "true")
+    .default("true"),
+  BACKUP_DIR: z.string().default(path.join(projectRoot, "backups")),
+  BACKUP_RETENTION_DAYS: z.coerce.number().int().positive().default(30),
+  OPERATION_LOG_RETENTION_DAYS: z.coerce.number().int().positive().default(30),
+  AGENT_QUERY_WINDOW_HOURS: z.coerce.number().int().positive().default(168),
+  CONFLICT_DETECTION: z
+    .string()
+    .transform((val) => val.toLowerCase() === "true")
+    .default("true"),
+  SYNC_AWARE_WRITES: z
+    .string()
+    .transform((val) => val.toLowerCase() === "true")
+    .default("true"),
+  SYNC_BUFFER_SECONDS: z.coerce.number().int().positive().default(60),
+  RATE_LIMITING_ENABLED: z
+    .string()
+    .transform((val) => val.toLowerCase() === "true")
+    .default("false"),
+  PROTECTED_PATTERNS: z.string().default(""),
 });
 
 const parsedEnv = EnvSchema.safeParse(process.env);
@@ -214,6 +238,20 @@ export const config = {
   obsidianCacheRefreshIntervalMin: env.OBSIDIAN_CACHE_REFRESH_INTERVAL_MIN,
   obsidianEnableCache: env.OBSIDIAN_ENABLE_CACHE,
   obsidianApiSearchTimeoutMs: env.OBSIDIAN_API_SEARCH_TIMEOUT_MS,
+  // Safety Config
+  writeMode: env.WRITE_MODE,
+  backupEnabled: env.BACKUP_ENABLED,
+  backupDir: env.BACKUP_DIR,
+  backupRetentionDays: env.BACKUP_RETENTION_DAYS,
+  operationLogRetentionDays: env.OPERATION_LOG_RETENTION_DAYS,
+  agentQueryWindowHours: env.AGENT_QUERY_WINDOW_HOURS,
+  conflictDetection: env.CONFLICT_DETECTION,
+  syncAwareWrites: env.SYNC_AWARE_WRITES,
+  syncBufferSeconds: env.SYNC_BUFFER_SECONDS,
+  rateLimitingEnabled: env.RATE_LIMITING_ENABLED,
+  protectedPatterns: env.PROTECTED_PATTERNS.split(",")
+    .map((p) => p.trim())
+    .filter(Boolean),
 };
 
 /**

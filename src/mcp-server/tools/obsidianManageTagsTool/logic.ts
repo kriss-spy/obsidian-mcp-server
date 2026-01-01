@@ -10,6 +10,7 @@ import {
   logger,
   RequestContext,
   retryWithDelay,
+  safetyManager,
 } from "../../../utils/index.js";
 import { sanitization } from "../../../utils/security/sanitization.js";
 
@@ -64,6 +65,18 @@ export const processObsidianManageTags = async (
   });
 
   const { filePath, operation, tags: inputTags } = params;
+
+  // --- Step 0: Safety Check ---
+  if (operation === "add" || operation === "remove") {
+    await safetyManager.validateWrite(
+      "PATCH",
+      filePath,
+      undefined,
+      context,
+      obsidianService,
+    );
+  }
+
   const sanitizedTags = inputTags.map((t) => sanitization.sanitizeTagName(t));
 
   const shouldRetryNotFound = (err: unknown) =>

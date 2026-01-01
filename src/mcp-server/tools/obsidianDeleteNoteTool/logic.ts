@@ -9,6 +9,7 @@ import {
   logger,
   RequestContext,
   retryWithDelay,
+  safetyManager,
 } from "../../../utils/index.js";
 
 // ====================================================================================
@@ -92,6 +93,15 @@ export const processObsidianDeleteNote = async (
   logger.debug(
     `Processing obsidian_delete_note request for path: ${originalFilePath}`,
     context,
+  );
+
+  // --- Step 0: Safety Check ---
+  await safetyManager.validateWrite(
+    "DELETE",
+    originalFilePath,
+    undefined,
+    context,
+    obsidianService,
   );
 
   const shouldRetryNotFound = (err: unknown) =>

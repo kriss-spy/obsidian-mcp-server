@@ -10,6 +10,7 @@ import {
   logger,
   RequestContext,
   retryWithDelay,
+  safetyManager,
 } from "../../../utils/index.js";
 
 // ====================================================================================
@@ -512,6 +513,33 @@ export const processObsidianUpdateNote = async (
       if (existsBefore) {
         const readContext = { ...updateContext, subOperation: "readForModify" };
         logger.debug(`Reading existing content for ${mode}`, readContext);
+        // --- Step 0: Safety Check ---
+        let resolvedFilePath = targetId;
+        if (params.targetType === "activeFile") {
+          const activeFile = (await obsidianService.getActiveFile(
+            "json",
+            context,
+          )) as NoteJson;
+          resolvedFilePath = activeFile.path;
+        } else if (params.targetType === "periodicNote" && targetPeriod) {
+          const periodicNote = (await obsidianService.getPeriodicNote(
+            targetPeriod,
+            "json",
+            context,
+          )) as NoteJson;
+          resolvedFilePath = periodicNote.path;
+        }
+
+        if (resolvedFilePath) {
+          await safetyManager.validateWrite(
+            params.wholeFileMode === "overwrite" ? "UPDATE" : "PATCH",
+            resolvedFilePath,
+            params.content,
+            context,
+            obsidianService,
+          );
+        }
+
         try {
           if (params.targetType === "filePath" && targetId) {
             existingContent = (await obsidianService.getFileContent(

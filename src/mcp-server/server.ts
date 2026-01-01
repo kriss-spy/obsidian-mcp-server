@@ -32,6 +32,7 @@ import { registerObsidianReadNoteTool } from "./tools/obsidianReadNoteTool/index
 import { registerObsidianLinksTools } from "./tools/obsidianGetLinksTool/index.js";
 import { registerObsidianBacklinksTools } from "./tools/obsidianGetBacklinksTool/index.js";
 import { registerObsidianDataviewTool } from "./tools/obsidianDataviewTool/index.js";
+import { registerObsidianSafetyTools } from "./tools/obsidianSafetyTools/registration.js";
 import { registerObsidianRenderHtmlTool } from "./tools/obsidianRenderHtmlTool/index.js";
 import { registerObsidianValidateMermaidTool } from "./tools/obsidianValidateMermaidTool/index.js";
 import { registerObsidianSearchReplaceTool } from "./tools/obsidianSearchReplaceTool/index.js";
@@ -120,6 +121,7 @@ async function createMcpServerInstance(
       obsidianService,
       vaultCacheService,
     );
+    await registerObsidianSafetyTools(server, obsidianService);
     await registerObsidianRenderHtmlTool(server, obsidianService);
 
     await registerObsidianValidateMermaidTool(server, obsidianService);
