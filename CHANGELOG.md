@@ -13,7 +13,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Phase 0 setup instructions created (PHASE_0_SETUP.md)
 
 ### Changed
-- N/A
+- Forked cyanheads/obsidian-mcp-server to kriss-spy account
+- Cloned fork to local repository
+- Added upstream remote to original repository
+- Created feature/html-rendering branch
+- Installed all dependencies (313 packages)
+- Built project successfully
+- Reviewed existing codebase structure
 
 ### Deprecated
 - N/A
