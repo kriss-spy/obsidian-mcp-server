@@ -40,11 +40,11 @@ Tracking tasks for implementing enhancements to cyanheads/obsidian-mcp-server
 
 ## Phase 2: Mermaid Validation (3-4 hours)
 
-- [ ] Create `src/MermaidValidator.ts` class
-- [ ] Implement mermaid validation via CLI
-- [ ] Generate SVG on success (optional)
-- [ ] Implement `obsidian_validate_mermaid` tool
-- [ ] Document limitation
+- [x] Create `src/MermaidValidator.ts` class
+- [x] Implement mermaid validation via CLI
+- [x] Generate SVG on success (optional)
+- [x] Implement `obsidian_validate_mermaid` tool
+- [x] Document limitation
 - [ ] Write unit tests
 - [ ] Commit changes
 
