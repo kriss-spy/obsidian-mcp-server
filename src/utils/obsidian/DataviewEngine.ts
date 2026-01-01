@@ -86,7 +86,6 @@ export class DataviewEngine {
 
   private parseWhere(whereText: string): WhereClause {
     // Very simple parser for "(a AND b) OR c" or "contains(field, value)"
-    // For now, let's just support basic "field = value" and "contains(field, value)"
 
     if (whereText.includes(" OR ")) {
       return {
@@ -130,18 +129,27 @@ export class DataviewEngine {
 
   /**
    * Executes a query against a list of notes.
+   * @param query The parsed query.
+   * @param notes The list of notes metadata.
+   * @param contextNote Optional metadata of the note where the query is located (for 'this' context).
    */
-  public execute(query: DataviewQuery, notes: NoteMetadata[]): any[] {
+  public execute(
+    query: DataviewQuery,
+    notes: NoteMetadata[],
+    contextNote?: NoteMetadata,
+  ): any[] {
     let results = notes;
 
     // 1. FROM filter
-    if (query.from) {
+    if (query.from && query.from !== "") {
       results = results.filter((n) => n.path.startsWith(query.from!));
     }
 
     // 2. WHERE filter
     if (query.where) {
-      results = results.filter((n) => this.evaluateWhere(query.where!, n));
+      results = results.filter((n) =>
+        this.evaluateWhere(query.where!, n, contextNote),
+      );
     }
 
     // 3. SORT
@@ -176,32 +184,46 @@ export class DataviewEngine {
     return results.map((n) => n.path);
   }
 
-  private evaluateWhere(where: WhereClause, note: NoteMetadata): boolean {
-    if (where.and) return where.and.every((w) => this.evaluateWhere(w, note));
-    if (where.or) return where.or.some((w) => this.evaluateWhere(w, note));
-    if (where.not) return !this.evaluateWhere(where.not, note);
+  private evaluateWhere(
+    where: WhereClause,
+    note: NoteMetadata,
+    contextNote?: NoteMetadata,
+  ): boolean {
+    if (where.and)
+      return where.and.every((w) => this.evaluateWhere(w, note, contextNote));
+    if (where.or)
+      return where.or.some((w) => this.evaluateWhere(w, note, contextNote));
+    if (where.not) return !this.evaluateWhere(where.not, note, contextNote);
 
     const { field, operator, value } = where;
     if (!field) return true;
+
+    let finalValue = value;
+    // Resolve 'this.xxx' references
+    if (typeof value === "string" && value.startsWith("this.")) {
+      const property = value.slice(5);
+      finalValue = contextNote?.fields[property];
+    }
 
     const noteValue = note.fields[field];
 
     switch (operator) {
       case "=":
-        return noteValue == value;
+        return noteValue == finalValue;
       case "!=":
-        return noteValue != value;
+        return noteValue != finalValue;
       case ">":
-        return noteValue > value;
+        return noteValue > finalValue;
       case "<":
-        return noteValue < value;
+        return noteValue < finalValue;
       case ">=":
-        return noteValue >= value;
+        return noteValue >= finalValue;
       case "<=":
-        return noteValue <= value;
+        return noteValue <= finalValue;
       case "contains":
-        if (Array.isArray(noteValue)) return noteValue.includes(value);
-        if (typeof noteValue === "string") return noteValue.includes(value);
+        if (Array.isArray(noteValue)) return noteValue.includes(finalValue);
+        if (typeof noteValue === "string")
+          return noteValue.includes(finalValue);
         return false;
       default:
         return !!noteValue;

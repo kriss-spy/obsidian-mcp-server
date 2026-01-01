@@ -91,6 +91,12 @@ export class VaultIndexer {
     metadata.fields["file.ctime"] = metadata.ctime;
     metadata.fields["file.mtime"] = metadata.mtime;
     metadata.fields["file.tags"] = metadata.tags;
+    metadata.fields["file.ext"] = path.extname(filePath).slice(1) || "md";
+
+    const cdate = new Date(metadata.ctime);
+    const mdate = new Date(metadata.mtime);
+    metadata.fields["file.cday"] = cdate.toISOString().split("T")[0];
+    metadata.fields["file.mday"] = mdate.toISOString().split("T")[0];
 
     // 4. Extract Links [[...]]
     const wikiLinkRegex = /\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g;
