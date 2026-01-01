@@ -29,6 +29,7 @@ import { registerObsidianDeleteNoteTool } from "./tools/obsidianDeleteNoteTool/i
 import { registerObsidianGlobalSearchTool } from "./tools/obsidianGlobalSearchTool/index.js";
 import { registerObsidianListNotesTool } from "./tools/obsidianListNotesTool/index.js";
 import { registerObsidianReadNoteTool } from "./tools/obsidianReadNoteTool/index.js";
+import { registerObsidianRenderHtmlTool } from "./tools/obsidianRenderHtmlTool/index.js";
 import { registerObsidianSearchReplaceTool } from "./tools/obsidianSearchReplaceTool/index.js";
 import { registerObsidianUpdateNoteTool } from "./tools/obsidianUpdateNoteTool/index.js";
 import { registerObsidianManageFrontmatterTool } from "./tools/obsidianManageFrontmatterTool/index.js";
@@ -104,6 +105,7 @@ async function createMcpServerInstance(
     // Register all tools, passing the vaultCacheService which may be undefined
     await registerObsidianListNotesTool(server, obsidianService);
     await registerObsidianReadNoteTool(server, obsidianService);
+    await registerObsidianRenderHtmlTool(server, obsidianService);
     await registerObsidianDeleteNoteTool(
       server,
       obsidianService,
