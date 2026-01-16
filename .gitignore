@@ -142,6 +142,15 @@ build/
 dist/
 build/
 out/
+*.tsbuildinfo
+
+# Memory Protection (Exclude massive fixtures)
+tests/fixtures/sample-vaults/my-vault/
+backups/debug/
+
+# IDE Protection
+.vscode/*
+!.vscode/settings.json
 
 # Testing
 coverage/
