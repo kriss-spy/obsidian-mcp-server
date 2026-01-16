@@ -201,6 +201,10 @@ export class DataviewEngine {
       });
     }
 
+    if (query.type === "TASK") {
+      return results.flatMap((n) => n.tasks);
+    }
+
     return results.map((n) => n.path);
   }
 

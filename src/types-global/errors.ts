@@ -29,6 +29,10 @@ export enum BaseErrorCode {
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
   /** An error occurred during the loading or validation of configuration data. */
   CONFIGURATION_ERROR = "CONFIGURATION_ERROR",
+  /** Failed to establish or maintain a connection to an external service. */
+  CONNECTION_ERROR = "CONNECTION_ERROR",
+  /** An error occurred during code or command execution. */
+  EXECUTION_ERROR = "EXECUTION_ERROR",
 }
 
 /**

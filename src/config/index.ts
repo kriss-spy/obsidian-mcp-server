@@ -90,6 +90,10 @@ const EnvSchema = z.object({
     .string()
     .transform((val) => val.toLowerCase() === "true")
     .default("false"),
+  OBSIDIAN_VAULT_PATH: z
+    .string()
+    .min(1, "OBSIDIAN_VAULT_PATH cannot be empty")
+    .optional(),
   OBSIDIAN_CACHE_REFRESH_INTERVAL_MIN: z.coerce
     .number()
     .int()
@@ -104,6 +108,13 @@ const EnvSchema = z.object({
     .int()
     .positive()
     .default(30000),
+  // --- CDP Config ---
+  OBSIDIAN_CDP_ENABLED: z
+    .string()
+    .transform((val) => val.toLowerCase() === "true")
+    .default("false"),
+  OBSIDIAN_CDP_HOST: z.string().default("localhost"),
+  OBSIDIAN_CDP_PORT: z.coerce.number().int().positive().default(9222),
   // --- Safety Config ---
   WRITE_MODE: z.enum(["off", "safe", "confirm", "full"]).default("safe"),
   BACKUP_ENABLED: z
@@ -235,9 +246,14 @@ export const config = {
   obsidianApiKey: env.OBSIDIAN_API_KEY,
   obsidianBaseUrl: env.OBSIDIAN_BASE_URL,
   obsidianVerifySsl: env.OBSIDIAN_VERIFY_SSL,
+  obsidianVaultPath: env.OBSIDIAN_VAULT_PATH,
   obsidianCacheRefreshIntervalMin: env.OBSIDIAN_CACHE_REFRESH_INTERVAL_MIN,
   obsidianEnableCache: env.OBSIDIAN_ENABLE_CACHE,
   obsidianApiSearchTimeoutMs: env.OBSIDIAN_API_SEARCH_TIMEOUT_MS,
+  // CDP Config
+  obsidianCdpEnabled: env.OBSIDIAN_CDP_ENABLED,
+  obsidianCdpHost: env.OBSIDIAN_CDP_HOST,
+  obsidianCdpPort: env.OBSIDIAN_CDP_PORT,
   // Safety Config
   writeMode: env.WRITE_MODE,
   backupEnabled: env.BACKUP_ENABLED,

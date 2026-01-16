@@ -10,6 +10,7 @@ import {
   RequestContext,
   requestContextService,
 } from "../../../utils/index.js";
+import { TemplateService } from "../../../services/templateService.js";
 // Import types for handler signature and response structure
 import type {
   ObsidianUpdateNoteRegistrationInput,
@@ -44,6 +45,7 @@ export const registerObsidianUpdateNoteTool = async (
   server: McpServer,
   obsidianService: ObsidianRestApiService,
   vaultCacheService: VaultCacheService | undefined,
+  templateService: TemplateService | undefined,
 ): Promise<void> => {
   const toolName = "obsidian_update_note";
   const toolDescription =
@@ -117,6 +119,7 @@ export const registerObsidianUpdateNoteTool = async (
                   handlerContext,
                   obsidianService,
                   vaultCacheService,
+                  templateService,
                 );
               logger.debug(
                 `'${toolName}' (wholeFile mode) processed successfully`,

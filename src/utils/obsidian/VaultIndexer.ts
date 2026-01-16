@@ -2,6 +2,14 @@ import yaml from "js-yaml";
 import path from "node:path/posix";
 import { logger, RequestContext } from "../index.js";
 
+export interface ObsidianTask {
+  text: string;
+  completed: boolean;
+  line: number;
+  path: string;
+  dueDate?: string;
+}
+
 export interface NoteMetadata {
   path: string;
   name: string;
@@ -11,6 +19,7 @@ export interface NoteMetadata {
   links: string[];
   ctime: number;
   mtime: number;
+  tasks: ObsidianTask[];
 }
 
 /**
@@ -39,6 +48,7 @@ export class VaultIndexer {
       links: [],
       ctime: stats?.ctime || 0,
       mtime: stats?.mtime || 0,
+      tasks: [],
     };
 
     // 1. Extract Frontmatter
@@ -104,6 +114,24 @@ export class VaultIndexer {
       metadata.links.push(match[1].trim());
     }
     metadata.links = [...new Set(metadata.links)];
+
+    // 5. Extract Tasks
+    const lines = content.split(/\r?\n/);
+    for (let i = 0; i < lines.length; i++) {
+      const lineText = lines[i];
+      const taskMatch = lineText.match(/^\s*-\s*\[([ xX])\]\s*(.+)$/);
+      if (taskMatch) {
+        const text = taskMatch[2].trim();
+        const dueDateMatch = text.match(/📅\s*(\d{4}-\d{2}-\d{2})/);
+        metadata.tasks.push({
+          completed: taskMatch[1].toLowerCase() === "x",
+          text,
+          line: i + 1,
+          path: filePath,
+          dueDate: dueDateMatch ? dueDateMatch[1] : undefined,
+        });
+      }
+    }
 
     return metadata;
   }

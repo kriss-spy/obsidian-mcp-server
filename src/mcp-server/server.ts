@@ -24,6 +24,10 @@ import { ErrorHandler, logger, requestContextService } from "../utils/index.js";
 import { ObsidianRestApiService } from "../services/obsidianRestAPI/index.js";
 // Import the Vault Cache service
 import { VaultCacheService } from "../services/obsidianRestAPI/vaultCache/index.js";
+// Import the Template service
+import { TemplateService } from "../services/templateService.js";
+// Import the CDP service
+import { ObsidianCdpService } from "../services/obsidianCdp/index.js";
 // Import registration functions for specific resources and tools.
 import { registerObsidianDeleteNoteTool } from "./tools/obsidianDeleteNoteTool/index.js";
 import { registerObsidianGlobalSearchTool } from "./tools/obsidianGlobalSearchTool/index.js";
@@ -39,20 +43,32 @@ import { registerObsidianSearchReplaceTool } from "./tools/obsidianSearchReplace
 import { registerObsidianUpdateNoteTool } from "./tools/obsidianUpdateNoteTool/index.js";
 import { registerObsidianManageFrontmatterTool } from "./tools/obsidianManageFrontmatterTool/index.js";
 import { registerObsidianManageTagsTool } from "./tools/obsidianManageTagsTool/index.js";
+import { registerObsidianMoveNoteTool } from "./tools/obsidianMoveNoteTool/index.js";
+import { registerObsidianFuzzySearchTool } from "./tools/obsidianFuzzySearchTool/index.js";
+import { registerObsidianMetadataCacheTool } from "./tools/obsidianMetadataCacheTool/index.js";
+import { registerObsidianExecuteCommandTool } from "./tools/obsidianExecuteCommandTool/index.js";
+import { registerObsidianUiControlTool } from "./tools/obsidianUiControlTool/index.js";
+import { registerObsidianQuickSwitcherPlusTool } from "./tools/obsidianQuickSwitcherPlusTool/index.js";
+import { registerObsidianDayScheduleTool } from "./tools/obsidianDayScheduleTool/index.js";
+import { registerObsidianUpdateDayPlannerTool } from "./tools/obsidianUpdateDayPlannerTool/index.js";
+import { registerObsidianThreeDayPlanTool } from "./tools/obsidianThreeDayPlanTool/index.js";
+// TODO: Re-enable when obsidianRecoveryTool is implemented
+// import { registerObsidianRecoveryTool } from "./tools/obsidianRecoveryTool/index.js";
 // Import transport setup functions.
+// Note: obsidianMoveFolderTool is disabled - use obsidian_move_note for folders (see obsidian skill)
 import { startHttpTransport } from "./transports/httpTransport.js";
 import { connectStdioTransport } from "./transports/stdioTransport.js";
 
 /**
- * Creates and configures a new instance of the `McpServer`.
+ * Creates and configures a new instance of `McpServer`.
  *
- * This function is central to defining the server's identity and functionality
+ * This function is central to defining server's identity and functionality
  * as presented to connecting clients during the MCP initialization phase.
  * It uses pre-instantiated shared services like Obsidian API and Vault Cache.
  *
  * MCP Spec Relevance:
  * - Server Identity (`serverInfo`): The `name` and `version` provided here are part
- *   of the `ServerInformation` object returned in the `InitializeResult` message.
+ *   of `ServerInformation` object returned in `InitializeResult` message.
  * - Capabilities Declaration: Declares supported features (logging, dynamic resources/tools).
  * - Resource/Tool Registration: Calls registration functions, passing necessary service instances.
  *
@@ -60,6 +76,8 @@ import { connectStdioTransport } from "./transports/stdioTransport.js";
  *
  * @param {ObsidianRestApiService} obsidianService - The shared Obsidian REST API service instance.
  * @param {VaultCacheService | undefined} vaultCacheService - The shared Vault Cache service instance, which may be undefined if disabled.
+ * @param {TemplateService | undefined} templateService - The shared Template service instance for applying folder templates.
+ * @param {ObsidianCdpService | undefined} cdpService - The shared CDP service instance for native Obsidian access.
  * @returns {Promise<McpServer>} A promise resolving with the configured `McpServer` instance.
  * @throws {Error} If any resource or tool registration fails.
  * @private
@@ -67,6 +85,8 @@ import { connectStdioTransport } from "./transports/stdioTransport.js";
 async function createMcpServerInstance(
   obsidianService: ObsidianRestApiService,
   vaultCacheService: VaultCacheService | undefined,
+  templateService: TemplateService | undefined,
+  cdpService: ObsidianCdpService | undefined,
 ): Promise<McpServer> {
   const context = requestContextService.createRequestContext({
     operation: "createMcpServerInstance",
@@ -120,6 +140,7 @@ async function createMcpServerInstance(
       server,
       obsidianService,
       vaultCacheService,
+      cdpService, // Pass CDP service to Dataview tool
     );
     await registerObsidianSafetyTools(server, obsidianService);
     await registerObsidianRenderHtmlTool(server, obsidianService);
@@ -151,6 +172,7 @@ async function createMcpServerInstance(
       server,
       obsidianService,
       vaultCacheService,
+      templateService,
     );
     await registerObsidianManageFrontmatterTool(
       server,
@@ -162,6 +184,33 @@ async function createMcpServerInstance(
       obsidianService,
       vaultCacheService,
     );
+    await registerObsidianMoveNoteTool(
+      server,
+      obsidianService,
+      vaultCacheService,
+    );
+    await registerObsidianFuzzySearchTool(
+      server,
+      obsidianService,
+      vaultCacheService,
+    );
+    await registerObsidianMetadataCacheTool(
+      server,
+      obsidianService,
+      cdpService,
+    );
+    await registerObsidianExecuteCommandTool(
+      server,
+      obsidianService,
+      cdpService,
+    );
+    await registerObsidianUiControlTool(server, cdpService);
+    await registerObsidianQuickSwitcherPlusTool(server, cdpService);
+    await registerObsidianDayScheduleTool(server, cdpService);
+    await registerObsidianUpdateDayPlannerTool(server, obsidianService);
+    await registerObsidianThreeDayPlanTool(server, cdpService);
+    // TODO: Re-enable when obsidianRecoveryTool is implemented
+    // await registerObsidianRecoveryTool(server, obsidianService);
 
     logger.info("Resources and tools registered successfully", context);
 
@@ -211,6 +260,8 @@ async function createMcpServerInstance(
  *
  * @param {ObsidianRestApiService} obsidianService - The shared Obsidian REST API service instance.
  * @param {VaultCacheService | undefined} vaultCacheService - The shared Vault Cache service instance.
+ * @param {TemplateService | undefined} templateService - The shared Template service instance.
+ * @param {ObsidianCdpService | undefined} cdpService - The shared CDP service instance.
  * @returns {Promise<McpServer | void>} Resolves with the `McpServer` instance for 'stdio', or `void` for 'http'.
  * @throws {Error} If the configured transport type is unsupported or if transport setup fails.
  * @private
@@ -218,6 +269,8 @@ async function createMcpServerInstance(
 async function startTransport(
   obsidianService: ObsidianRestApiService,
   vaultCacheService: VaultCacheService | undefined,
+  templateService: TemplateService | undefined,
+  cdpService: ObsidianCdpService | undefined,
 ): Promise<McpServer | ServerType | void> {
   const transportType = config.mcpTransportType;
   const context = requestContextService.createRequestContext({
@@ -234,7 +287,12 @@ async function startTransport(
     // For HTTP, startHttpTransport manages its own lifecycle and server instances per session.
     // It needs a factory function to create new McpServer instances, passing along the shared services.
     const mcpServerFactory = async () =>
-      createMcpServerInstance(obsidianService, vaultCacheService);
+      createMcpServerInstance(
+        obsidianService,
+        vaultCacheService,
+        templateService,
+        cdpService,
+      );
     const httpServerInstance = await startHttpTransport(
       mcpServerFactory,
       context,
@@ -250,6 +308,8 @@ async function startTransport(
     const server = await createMcpServerInstance(
       obsidianService,
       vaultCacheService,
+      templateService,
+      cdpService,
     );
     logger.debug("Delegating to connectStdioTransport...", context);
     await connectStdioTransport(server, context);
@@ -267,21 +327,25 @@ async function startTransport(
 }
 
 /**
- * Main application entry point. Initializes services and starts the MCP server.
- * Orchestrates server startup, transport selection, and top-level error handling.
+ * Initializes and starts the main MCP server.
  *
- * MCP Spec Relevance:
+ * This function orchestrates the server startup sequence:
+ * - Manages service lifecycle
  * - Manages server startup, leading to a server ready for MCP messages.
  * - Handles critical startup failures, ensuring appropriate process exit.
  *
  * @param {ObsidianRestApiService} obsidianService - The shared Obsidian REST API service instance, instantiated by the caller (e.g., index.ts).
  * @param {VaultCacheService | undefined} vaultCacheService - The shared Vault Cache service instance, instantiated by the caller (e.g., index.ts).
- * @returns {Promise<void | McpServer>} For 'stdio', resolves with `McpServer`. For 'http', runs indefinitely.
+ * @param {TemplateService | undefined} templateService - The shared Template service instance.
+ * @param {ObsidianCdpService | undefined} cdpService - The shared CDP service instance.
+ * @returns {Promise<void | McpServer | ServerType>} For 'stdio', resolves with `McpServer`. For 'http', runs indefinitely.
  *   Rejects on critical failure, leading to process exit.
  */
 export async function initializeAndStartServer(
   obsidianService: ObsidianRestApiService,
   vaultCacheService: VaultCacheService | undefined,
+  templateService: TemplateService | undefined,
+  cdpService: ObsidianCdpService | undefined,
 ): Promise<void | McpServer | ServerType> {
   const context = requestContextService.createRequestContext({
     operation: "initializeAndStartServer",
@@ -294,12 +358,17 @@ export async function initializeAndStartServer(
   try {
     // Services are now provided by the caller (e.g., index.ts)
     logger.debug(
-      "Using provided shared services (ObsidianRestApiService, VaultCacheService).",
+      "Using provided shared services (ObsidianRestApiService, VaultCacheService, TemplateService, ObsidianCdpService).",
       context,
     );
 
-    // Initiate the transport setup based on configuration, passing shared services.
-    const result = await startTransport(obsidianService, vaultCacheService);
+    // Initiate of transport setup based on configuration, passing shared services.
+    const result = await startTransport(
+      obsidianService,
+      vaultCacheService,
+      templateService,
+      cdpService,
+    );
     logger.info(
       "MCP Server initialization sequence completed successfully.",
       context,

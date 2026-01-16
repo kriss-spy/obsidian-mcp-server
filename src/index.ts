@@ -10,6 +10,8 @@ import { logger, McpLogLevel } from "./utils/internal/logger.js"; // Import logg
 // Import Services
 import { ObsidianRestApiService } from "./services/obsidianRestAPI/index.js";
 import { VaultCacheService } from "./services/obsidianRestAPI/vaultCache/index.js"; // Import VaultCacheService
+import { TemplateService } from "./services/templateService.js"; // Import TemplateService
+import { ObsidianCdpService } from "./services/obsidianCdp/index.js"; // Import CDP Service
 
 /**
  * The main MCP server instance (only stored globally for stdio shutdown).
@@ -31,6 +33,16 @@ let obsidianService: ObsidianRestApiService | undefined;
  * @type {VaultCacheService | undefined}
  */
 let vaultCacheService: VaultCacheService | undefined;
+/**
+ * Shared Template service instance.
+ * @type {TemplateService | undefined}
+ */
+let templateService: TemplateService | undefined;
+/**
+ * Shared CDP service instance.
+ * @type {ObsidianCdpService | undefined}
+ */
+let cdpService: ObsidianCdpService | undefined;
 
 /**
  * Gracefully shuts down the main MCP server.
@@ -54,6 +66,13 @@ const shutdown = async (signal: string) => {
     // Stop cache refresh timer first
     if (config.obsidianEnableCache && vaultCacheService) {
       vaultCacheService.stopPeriodicRefresh();
+    }
+
+    // Disconnect CDP service if connected
+    if (cdpService) {
+      logger.info("Disconnecting CDP service...", shutdownContext);
+      await cdpService.disconnect();
+      logger.info("CDP service disconnected", shutdownContext);
     }
 
     // Close the main MCP server (only relevant for stdio)
@@ -248,8 +267,56 @@ const start = async () => {
     } else {
       logger.info("Vault cache is disabled by configuration.", startupContext);
     }
+
+    // Instantiate Template Service
+    if (config.obsidianVaultPath) {
+      templateService = new TemplateService(config.obsidianVaultPath);
+      logger.info("Template service instantiated.", startupContext);
+    } else {
+      logger.warning(
+        "OBSIDIAN_VAULT_PATH not configured. Template support will be disabled.",
+        startupContext,
+      );
+    }
+
     logger.info("Shared services instantiated.", startupContext);
     // --- End Service Instantiation ---
+
+    // --- CDP Service Initialization (Optional) ---
+    if (config.obsidianCdpEnabled) {
+      logger.info("CDP is enabled. Attempting to connect...", startupContext);
+      cdpService = new ObsidianCdpService();
+
+      // Attempt connection (non-blocking)
+      const cdpConnected = await cdpService.connect();
+
+      if (cdpConnected) {
+        logger.info(
+          "✅ CDP connection established! Native Dataview and advanced features available.",
+          {
+            ...startupContext,
+            cdpHost: config.obsidianCdpHost,
+            cdpPort: config.obsidianCdpPort,
+          },
+        );
+      } else {
+        logger.warning(
+          "⚠️  CDP connection failed. Server will run in REST-only mode with limited Dataview support.",
+          {
+            ...startupContext,
+            recommendation:
+              "Start Obsidian with --remote-debugging-port=9222 to enable CDP features",
+          },
+        );
+        // Don't fail startup - continue in REST-only mode
+      }
+    } else {
+      logger.info(
+        "CDP is disabled (OBSIDIAN_CDP_ENABLED=false). Running in REST-only mode.",
+        startupContext,
+      );
+    }
+    // --- End CDP Initialization ---
 
     // Initialize the server instance and start the selected transport
     logger.debug(
@@ -263,6 +330,8 @@ const start = async () => {
     const serverOrHttpInstance = await initializeAndStartServer(
       obsidianService,
       vaultCacheService,
+      templateService,
+      cdpService, // Pass CDP service
     );
 
     if (

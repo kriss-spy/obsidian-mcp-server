@@ -168,6 +168,27 @@ export async function listFiles(
 }
 
 /**
+ * Lists all tags currently used in the vault.
+ * @param _request - The internal request function from the service instance.
+ * @param context - Request context.
+ * @returns A list of tag names (including the '#' prefix).
+ */
+export async function listTags(
+  _request: RequestFunction,
+  context: RequestContext,
+): Promise<string[]> {
+  const response = await _request<{ tags: string[] }>(
+    {
+      method: "GET",
+      url: "/tags/",
+    },
+    context,
+    "listTags",
+  );
+  return response.tags;
+}
+
+/**
  * Gets the metadata (stat) of a specific file using a lightweight HEAD request.
  * @param _request - The internal request function from the service instance.
  * @param filePath - Vault-relative path to the file.

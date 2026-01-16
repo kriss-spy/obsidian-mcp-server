@@ -1,33 +1,28 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { ObsidianRestApiService } from "../../../services/obsidianRestAPI/index.js";
-import { VaultCacheService } from "../../../services/obsidianRestAPI/vaultCache/index.js";
 import { ObsidianCdpService } from "../../../services/obsidianCdp/index.js";
 import {
   ErrorHandler,
-  logger,
   RequestContext,
   requestContextService,
 } from "../../../utils/index.js";
 import {
-  ObsidianDataviewInputSchema,
-  processObsidianDataview,
+  ObsidianDayScheduleInputSchema,
+  processObsidianDaySchedule,
 } from "./logic.js";
 
-export const registerObsidianDataviewTool = async (
+export const registerObsidianDayScheduleTool = async (
   server: McpServer,
-  obsidianService: ObsidianRestApiService,
-  vaultCacheService: VaultCacheService | undefined,
   cdpService: ObsidianCdpService | undefined,
 ): Promise<void> => {
-  const toolName = "obsidian_execute_dataview";
+  const toolName = "obsidian_get_day_schedule";
   const toolDescription =
-    "Executes a Dataview query against the vault. If CDP is enabled, it uses the native Dataview API for full DQL/DataviewJS support. Otherwise, it uses a simplified local parser. Supports LIST and TABLE queries, FROM filters, WHERE clauses, and SORT. Useful for finding and organizing notes based on metadata/properties.";
+    "Fetches the unified schedule for a specific date (YYYY-MM-DD) using Dataview. It finds tasks scheduled for that date across the entire vault and extracts time-blocks (HH:mm - HH:mm). Useful for daily and weekly planning.";
 
   const registrationContext: RequestContext =
     requestContextService.createRequestContext({
-      operation: "RegisterObsidianDataviewTool",
+      operation: "RegisterObsidianDayScheduleTool",
       toolName: toolName,
-      module: "ObsidianDataviewRegistration",
+      module: "ObsidianDayScheduleRegistration",
     });
 
   await ErrorHandler.tryCatch(
@@ -35,30 +30,28 @@ export const registerObsidianDataviewTool = async (
       server.tool(
         toolName,
         toolDescription,
-        ObsidianDataviewInputSchema.shape,
+        ObsidianDayScheduleInputSchema.shape,
         async (params) => {
           const handlerContext: RequestContext =
             requestContextService.createRequestContext({
               parentContext: registrationContext,
-              operation: "HandleObsidianDataviewRequest",
+              operation: "HandleObsidianDayScheduleRequest",
               toolName: toolName,
               params,
             });
 
           return await ErrorHandler.tryCatch(
             async () => {
-              const response = await processObsidianDataview(
+              const response = await processObsidianDaySchedule(
                 params,
                 handlerContext,
-                obsidianService,
-                vaultCacheService,
                 cdpService,
               );
               return {
                 content: [
                   { type: "text", text: JSON.stringify(response, null, 2) },
                 ],
-                isError: false,
+                isError: !response.success,
               };
             },
             {

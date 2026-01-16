@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ObsidianRestApiService } from "../../../services/obsidianRestAPI/index.js";
 import { VaultCacheService } from "../../../services/obsidianRestAPI/vaultCache/index.js";
-import { ObsidianCdpService } from "../../../services/obsidianCdp/index.js";
+import { BaseErrorCode, McpError } from "../../../types-global/errors.js";
 import {
   ErrorHandler,
   logger,
@@ -9,25 +9,28 @@ import {
   requestContextService,
 } from "../../../utils/index.js";
 import {
-  ObsidianDataviewInputSchema,
-  processObsidianDataview,
+  ObsidianMoveNoteInputSchema,
+  processObsidianMoveNote,
 } from "./logic.js";
 
-export const registerObsidianDataviewTool = async (
+export const registerObsidianMoveNoteTool = async (
   server: McpServer,
   obsidianService: ObsidianRestApiService,
   vaultCacheService: VaultCacheService | undefined,
-  cdpService: ObsidianCdpService | undefined,
 ): Promise<void> => {
-  const toolName = "obsidian_execute_dataview";
+  const toolName = "obsidian_move_note";
   const toolDescription =
-    "Executes a Dataview query against the vault. If CDP is enabled, it uses the native Dataview API for full DQL/DataviewJS support. Otherwise, it uses a simplified local parser. Supports LIST and TABLE queries, FROM filters, WHERE clauses, and SORT. Useful for finding and organizing notes based on metadata/properties.";
+    "Safely moves or renames a file in Obsidian vault while automatically updating all internal links. " +
+    "This is a FULLY AUTOMATED safe alternative to using `mv` command which breaks links. " +
+    "The tool first updates all links pointing to the old location, then performs the file move. " +
+    "If the move fails, it automatically rolls back all link updates to prevent broken links. " +
+    "Requires OBSIDIAN_VAULT_PATH environment variable to be configured.";
 
   const registrationContext: RequestContext =
     requestContextService.createRequestContext({
-      operation: "RegisterObsidianDataviewTool",
+      operation: "RegisterObsidianMoveNoteTool",
       toolName: toolName,
-      module: "ObsidianDataviewRegistration",
+      module: "ObsidianMoveNoteRegistration",
     });
 
   await ErrorHandler.tryCatch(
@@ -35,24 +38,23 @@ export const registerObsidianDataviewTool = async (
       server.tool(
         toolName,
         toolDescription,
-        ObsidianDataviewInputSchema.shape,
+        ObsidianMoveNoteInputSchema.shape,
         async (params) => {
           const handlerContext: RequestContext =
             requestContextService.createRequestContext({
               parentContext: registrationContext,
-              operation: "HandleObsidianDataviewRequest",
+              operation: "HandleObsidianMoveNoteRequest",
               toolName: toolName,
               params,
             });
 
           return await ErrorHandler.tryCatch(
             async () => {
-              const response = await processObsidianDataview(
+              const response = await processObsidianMoveNote(
                 params,
                 handlerContext,
                 obsidianService,
                 vaultCacheService,
-                cdpService,
               );
               return {
                 content: [

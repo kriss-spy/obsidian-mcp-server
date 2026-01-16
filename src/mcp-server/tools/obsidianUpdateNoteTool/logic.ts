@@ -1,3 +1,4 @@
+import path from "path";
 import { z } from "zod";
 import {
   NoteJson,
@@ -12,6 +13,7 @@ import {
   retryWithDelay,
   safetyManager,
 } from "../../../utils/index.js";
+import { TemplateService } from "../../../services/templateService.js";
 
 // ====================================================================================
 // Schema Definitions for Input Validation
@@ -100,6 +102,14 @@ const WholeFileUpdateSchema = BaseUpdateSchema.extend({
     .optional()
     .default(false)
     .describe("If true, returns the final file content in the response."),
+  /** If true (default), applies folder-based templates when creating new files. If false, uses the provided content without applying templates. */
+  useTemplate: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe(
+      "If true (default), applies folder-based templates from Templater plugin when creating new files. If false, uses provided content directly.",
+    ),
 });
 
 // ====================================================================================
@@ -159,6 +169,14 @@ const ObsidianUpdateNoteRegistrationSchema = z
       .optional()
       .default(false)
       .describe("If true, returns the final file content in the response."),
+    /** If true (default), applies folder-based templates from Templater plugin when creating new files. If false, uses provided content directly. */
+    useTemplate: z
+      .boolean()
+      .optional()
+      .default(true)
+      .describe(
+        "If true (default), applies folder-based templates when creating new files. If false, uses provided content directly.",
+      ),
   })
   .describe(
     "Tool to modify Obsidian notes (specified by file path, active file, or periodic note) using whole-file operations: 'append', 'prepend', or 'overwrite'. Options control creation and overwrite behavior.",
@@ -334,6 +352,8 @@ async function getFinalState(
  * @param {ObsidianUpdateFileInput} params - The validated input parameters conforming to the refined schema.
  * @param {RequestContext} context - The request context for logging and correlation.
  * @param {ObsidianRestApiService} obsidianService - The instance of the Obsidian REST API service.
+ * @param {VaultCacheService | undefined} vaultCacheService - The vault cache service instance.
+ * @param {TemplateService | undefined} templateService - The template service instance for applying folder templates.
  * @returns {Promise<ObsidianUpdateFileResponse>} A promise resolving to the structured success response.
  * @throws {McpError} Throws an McpError if validation fails or the API interaction results in an error.
  */
@@ -342,6 +362,7 @@ export const processObsidianUpdateNote = async (
   context: RequestContext,
   obsidianService: ObsidianRestApiService,
   vaultCacheService: VaultCacheService | undefined,
+  templateService: TemplateService | undefined,
 ): Promise<ObsidianUpdateNoteResponse> => {
   logger.debug(`Processing obsidian_update_note request (wholeFile mode)`, {
     ...context,
@@ -498,6 +519,34 @@ export const processObsidianUpdateNote = async (
       safetyCheckContext,
     );
 
+    // --- Step 2.5: Apply Template if Creating New File ---
+    let useTemplateContent = false;
+    let finalContent = contentString;
+    if (wasCreated && params.useTemplate && templateService) {
+      const templateContext = { ...context, operation: "applyTemplate" };
+
+      if (params.targetType === "filePath" && targetId) {
+        logger.debug(
+          `Checking for template for new file: ${targetId}`,
+          templateContext,
+        );
+        const templateContent = await templateService.getTemplateContent(targetId, {
+          title: path.basename(targetId, ".md"),
+        });
+
+        if (templateContent) {
+          finalContent = templateContent;
+          useTemplateContent = true;
+          logger.info(`Applied template for ${targetId}`, templateContext);
+        } else {
+          logger.debug(
+            `No template found for ${targetId}, using provided content`,
+            templateContext,
+          );
+        }
+      }
+    }
+
     // --- Step 3: Perform the Update Operation via Obsidian API ---
     const updateContext = {
       ...context,
@@ -507,7 +556,8 @@ export const processObsidianUpdateNote = async (
     logger.debug(`Performing update operation: ${mode}`, updateContext);
 
     // Handle 'prepend' and 'append' manually as Obsidian API might not directly support them atomically.
-    if (mode === "prepend" || mode === "append") {
+    // If template was applied for a new file, just overwrite regardless of mode
+    if ((mode === "prepend" || mode === "append") && !useTemplateContent) {
       let existingContent = "";
       // Only read existing content if the file existed before the operation.
       if (existsBefore) {
@@ -621,24 +671,25 @@ export const processObsidianUpdateNote = async (
         await vaultCacheService.updateCacheForFile(targetId, writeContext);
       }
     } else {
-      // Handle 'overwrite' mode directly.
+      // Handle 'overwrite' mode directly (or template content for new file)
+      const contentToWrite = useTemplateContent ? finalContent : contentString;
       switch (params.targetType) {
         case "filePath":
           // targetId is guaranteed by refined schema check
           await obsidianService.updateFileContent(
             targetId!,
-            contentString,
+            contentToWrite,
             updateContext,
           );
           break;
         case "activeFile":
-          await obsidianService.updateActiveFile(contentString, updateContext);
+          await obsidianService.updateActiveFile(contentToWrite, updateContext);
           break;
         case "periodicNote":
           // targetPeriod is guaranteed by refined schema check
           await obsidianService.updatePeriodicNote(
             targetPeriod!,
-            contentString,
+            contentToWrite,
             updateContext,
           );
           break;

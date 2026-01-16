@@ -295,6 +295,15 @@ export class ObsidianRestApiService {
   }
 
   /**
+   * Lists all tags currently used in the vault.
+   * @param context - Request context.
+   * @returns A list of tag names.
+   */
+  async listTags(context: RequestContext): Promise<string[]> {
+    return vaultMethods.listTags(this._request.bind(this), context);
+  }
+
+  /**
    * Gets the metadata (stat) of a specific file using a lightweight HEAD request.
    * @param filePath - Vault-relative path to the file.
    * @param context - Request context.

@@ -11,11 +11,13 @@
 This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to make Obsidian vaults accessible to AI agents (OpenCode, Claude Desktop) while ensuring data safety.
 
 ### Base Repository
+
 - Fork of: `cyanheads/obsidian-mcp-server`
 - Tech Stack: TypeScript, Node.js
 - Existing Tools: 20+ tools for CRUD, search, commands, etc.
 
 ### New Features (8 Phases)
+
 1. **HTML Rendering** - Basic markdown to HTML with syntax highlighting
 2. **Mermaid Validation** - Check mermaid diagrams via CLI tool
 3. **Link Navigation** - Extract links, follow links, require full paths
@@ -34,6 +36,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Goal:** Working development environment
 
 **Tasks:**
+
 - [ ] Fork `cyanheads/obsidian-mcp-server` to your GitHub
 - [ ] Clone to `/home/krisspy/Desktop/obsidan-mcp`
 - [ ] Install dependencies: `npm install`
@@ -46,6 +49,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Dependencies:** None
 
 **Deliverables:**
+
 - Working local dev environment
 - Obsidian REST API configured and tested
 - Git repository initialized
@@ -59,6 +63,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **New Tool:** `obsidian_render_html`
 
 **Tasks:**
+
 - [ ] Install dependencies: `npm install markdown-it highlight.js`
 - [ ] Create `src/MarkdownRenderer.ts` class
 - [ ] Implement markdown-it with CommonMark compliance
@@ -76,12 +81,14 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Dependencies:** Phase 0
 
 **Deliverables:**
+
 - Working HTML rendering
 - Syntax highlighted code blocks
 - Preserved special blocks (mermaid, dataview)
 - Tool: `obsidian_render_html`
 
 **Limitations Documented:**
+
 - Does NOT render plugin content (Dataview, Canvas, etc.)
 - Only standard markdown + code blocks
 
@@ -94,6 +101,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **New Tool:** `obsidian_validate_mermaid`
 
 **Tasks:**
+
 - [ ] Install mermaid CLI: `npm install -g @mermaid-js/mermaid-cli`
 - [ ] Create `src/MermaidValidator.ts` class
 - [ ] Implement mermaid validation via CLI
@@ -109,6 +117,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Dependencies:** Phase 0 (already installed globally)
 
 **Deliverables:**
+
 - Working mermaid syntax validation
 - SVG generation option
 - Tool: `obsidian_validate_mermaid`
@@ -122,6 +131,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **New Tools:** `obsidian_get_links`, `obsidian_follow_link`
 
 **Tasks:**
+
 - [ ] Create `src/LinkExtractor.ts` class
 - [ ] Parse markdown files for link patterns
 - [ ] Extract: `[[wiki-links]]`, `[markdown links](file.md)`, `[external links](https://...)`
@@ -141,6 +151,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Dependencies:** Phase 0
 
 **Deliverables:**
+
 - Working link extraction
 - Link resolution (explicit paths only)
 - Tools: `obsidian_get_links`, `obsidian_follow_link`
@@ -154,6 +165,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **New Tools:** `obsidian_get_backlinks`, `obsidian_get_link_graph`
 
 **Tasks:**
+
 - [ ] Build reverse link index from Phase 3
 - [ ] Scan all files in vault
 - [ ] Build bidirectional index:
@@ -176,21 +188,20 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
     ```json
     {
       "nodes": ["note1.md", "note2.md"],
-      "edges": [
-        { "from": "note1.md", "to": "note2.md", "label": "see also" }
-      ]
+      "edges": [{ "from": "note1.md", "to": "note2.md", "label": "see also" }]
     }
     ```
+  - ⚠️ **NOT IMPLEMENTED** - Tool directory exists but no implementation
 - [ ] Unit tests (Phase 7)
 - [ ] Commit: `feat: add backlinks and link graph`
 
 **Dependencies:** Phase 3
 
 **Deliverables:**
+
 - Working backlink discovery
-- Link graph for visualization
 - Cached index for performance
-- Tools: `obsidian_get_backlinks`, `obsidian_get_link_graph`
+- Tools: `obsidian_get_backlinks`
 
 ---
 
@@ -201,6 +212,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **New Tool:** `obsidian_execute_dataview`
 
 **Tasks:**
+
 - [ ] Install dependency: `npm install js-yaml`
 - [ ] Create `src/VaultIndexer.ts` class
   - Scan vault files
@@ -224,7 +236,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 - [ ] Create `src/QueryExecutor.ts` class
   - Execute parsed queries against index
   - Support operators: `=`, `!=`, `>`, `<`, `contains()`, `AND`, `OR`
-  - Support functions: `sum()`, `avg()`, `count()`, `length()`
+  - ⚠️ **Functions**: `sum()`, `avg()`, `count()`, `length()` - **Not implemented**
   - Format results:
     - TABLE: HTML table
     - LIST: Bulleted list
@@ -254,17 +266,20 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Dependencies:** Phase 0
 
 **Deliverables:**
+
 - Working Dataview-like query executor
 - Vault indexer for metadata
 - Tool: `obsidian_execute_dataview`
 
 **Supported Query Features:**
+
 - ✅ TABLE and LIST queries
 - ✅ FROM filters (file paths, tags, links)
-- ✅ WHERE clauses (basic comparisons, AND/OR logic)
+- ✅ WHERE clauses (basic comparisons, AND/OR logic, contains())
 - ✅ SORT (single field, ASC/DESC)
-- ✅ GROUP BY (basic)
-- ✅ Functions: sum(), avg(), count(), length()
+- ✅ LIMIT
+- ❌ GROUP BY (basic) - **Not implemented**
+- ❌ Functions: sum(), avg(), count(), length() - **Not implemented**
 - ❌ FLATTEN (advanced)
 - ❌ Custom JS functions
 
@@ -275,6 +290,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Goal:** Complete documentation for all new tools
 
 **Tasks:**
+
 - [ ] Update README.md with new tools section
   - Add each tool with description, input/output examples
 - [ ] Document Dataview query syntax (supported features, limitations)
@@ -292,6 +308,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Dependencies:** All previous phases
 
 **Deliverables:**
+
 - Complete README
 - Troubleshooting guide
 - Example queries
@@ -306,6 +323,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Tasks:**
 
 #### 7.1 Setup Testing Infrastructure (1 hour)
+
 - [ ] Install dependencies: `npm install -D vitest @vitest/ui @vitest/coverage`
 - [ ] Create `vitest.config.ts`
 - [ ] Create test structure:
@@ -336,6 +354,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 - [ ] Commit: `chore: setup Vitest testing framework`
 
 #### 7.2 Unit Tests (1-2 hours)
+
 - [ ] Write unit tests for MarkdownRenderer
   - Basic markdown → HTML
   - Code blocks with syntax highlighting
@@ -356,6 +375,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 - [ ] Commit: `test: add unit tests for core functionality`
 
 #### 7.3 Manual Testing (1 hour)
+
 - [ ] Create script `scripts/test-with-inspector.sh`
 - [ ] Run MCP Inspector: `npx @modelcontextprotocol/inspector node build/index.js`
 - [ ] Test all tools manually:
@@ -370,6 +390,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 - [ ] Commit: `test: manual testing with MCP Inspector`
 
 #### 7.4 Integration Testing (1-2 hours)
+
 - [ ] Configure OpenCode with MCP server
 - [ ] Test with real vault:
   - [ ] Your daily use vault (copy)
@@ -384,7 +405,9 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 - [ ] Commit: `test: integration testing with real vaults`
 
 #### 7.5 CI/CD Setup (0.5 hour)
+
 - [ ] Create `.github/workflows/test.yml`:
+
   ```yaml
   name: Tests
 
@@ -403,7 +426,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
         - name: Setup Node.js
           uses: actions/setup-node@v4
           with:
-            node-version: '22'
+            node-version: "22"
         - name: Install dependencies
           run: npm ci
         - name: Run unit tests
@@ -415,11 +438,13 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
           with:
             files: ./coverage/coverage-final.json
   ```
+
 - [ ] Commit: `ci: add GitHub Actions for automated testing`
 
 **Dependencies:** All previous phases
 
 **Deliverables:**
+
 - Passing unit tests (≥75% coverage)
 - CI/CD running on every commit
 - Manual test completion
@@ -436,21 +461,26 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Tasks:**
 
 #### 8.1 Setup Safety Infrastructure (2-3 hours)
+
 - [ ] Add safety configuration to environment variables:
   ```typescript
   const config = {
-    WRITE_MODE: process.env.WRITE_MODE || 'safe',
-    BACKUP_ENABLED: process.env.BACKUP_ENABLED === 'true',
-    BACKUP_DIR: process.env.BACKUP_DIR || '/tmp/obsidian-mcp-backups',
-    BACKUP_RETENTION_DAYS: parseInt(process.env.BACKUP_RETENTION_DAYS || '30'),
-    OPERATION_LOG_RETENTION_DAYS: parseInt(process.env.OPERATION_LOG_RETENTION_DAYS || '30'),
-    AGENT_QUERY_WINDOW_HOURS: parseInt(process.env.AGENT_QUERY_WINDOW_HOURS || '168'), // 7 days
-    CONFLICT_DETECTION: process.env.CONFLICT_DETECTION === 'true',
-    SYNC_AWARE_WRITES: process.env.SYNC_AWARE_WRITES === 'true',
-    SYNC_BUFFER_SECONDS: parseInt(process.env.SYNC_BUFFER_SECONDS || '60'),
-    RATE_LIMITING_ENABLED: process.env.RATE_LIMITING_ENABLED === 'false', // Default OFF
-    PROTECTED_PATTERNS: process.env.PROTECTED_PATTERNS?.split(',') || [],
-  }
+    WRITE_MODE: process.env.WRITE_MODE || "safe",
+    BACKUP_ENABLED: process.env.BACKUP_ENABLED === "true",
+    BACKUP_DIR: process.env.BACKUP_DIR || "/tmp/obsidian-mcp-backups",
+    BACKUP_RETENTION_DAYS: parseInt(process.env.BACKUP_RETENTION_DAYS || "30"),
+    OPERATION_LOG_RETENTION_DAYS: parseInt(
+      process.env.OPERATION_LOG_RETENTION_DAYS || "30",
+    ),
+    AGENT_QUERY_WINDOW_HOURS: parseInt(
+      process.env.AGENT_QUERY_WINDOW_HOURS || "168",
+    ), // 7 days
+    CONFLICT_DETECTION: process.env.CONFLICT_DETECTION === "true",
+    SYNC_AWARE_WRITES: process.env.SYNC_AWARE_WRITES === "true",
+    SYNC_BUFFER_SECONDS: parseInt(process.env.SYNC_BUFFER_SECONDS || "60"),
+    RATE_LIMITING_ENABLED: process.env.RATE_LIMITING_ENABLED === "false", // Default OFF
+    PROTECTED_PATTERNS: process.env.PROTECTED_PATTERNS?.split(",") || [],
+  };
   ```
 - [ ] Create backup directory structure
 - [ ] Setup operation logging (file-based database)
@@ -458,6 +488,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 - [ ] Commit: `chore: setup safety infrastructure`
 
 #### 8.2 Implement Write Protection (3-4 hours)
+
 - [ ] Implement write modes: `off`, `safe`, `confirm`, `full`
   - `off`: Read-only
   - `safe`: Backups + conflict checks (default)
@@ -477,6 +508,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 - [ ] Commit: `feat: add write protection and conflict detection`
 
 #### 8.3 Add Safety Tools (2-3 hours)
+
 - [ ] Implement `obsidian_set_write_mode` tool
   - Input: `mode` (string, enum: ["off", "safe", "confirm", "full"])
   - Output: Confirmation
@@ -496,6 +528,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 - [ ] Commit: `feat: add safety tools (write mode, history, undo, emergency stop)`
 
 #### 8.4 Add Logging & Backup (2-3 hours)
+
 - [ ] Implement operation logging
   - Log all writes (PUT, POST, PATCH, DELETE)
   - Store in file: `/backups/.index.json`
@@ -512,6 +545,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 - [ ] Commit: `feat: add operation logging and automatic backups`
 
 #### 8.5 Tests (1-2 hours)
+
 - [ ] Unit tests for safety logic
   - Write mode switching
   - Conflict detection
@@ -531,6 +565,7 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 **Dependencies:** Phase 0
 
 **Deliverables:**
+
 - Write protection with 4 modes (default: safe)
 - File-based backups (30-day retention)
 - Operation logging (30-day retention, 7-day agent query window)
@@ -544,18 +579,31 @@ This plan enhances the cyanheads/obsidian-mcp-server with new capabilities to ma
 
 ## Timeline & Dependencies
 
-| Phase | Hours | Dependencies | Parallel Opportunities |
-|--------|--------|--------------|---------------------|
-| Phase 0: Setup | 1-2 | None | - |
-| Phase 1: Rendering | 4-6 | Phase 0 | Can run with Phases 2-4, 6 |
-| Phase 2: Mermaid | 3-4 | Phase 0 | Can run with Phases 1, 3-4, 6 |
-| Phase 3: Links | 3-5 | Phase 0 | Can run with Phases 1-2, 4, 6 |
-| Phase 4: Backlinks | 3-4 | Phase 3 | Can run with Phases 1-2, 6 |
-| Phase 5: Dataview | 10-14 | Phase 0 | Can run with Phases 1-4, 6 |
-| Phase 6: Docs | 3-4 | All phases | - |
-| Phase 7: Testing | 4-6 | All phases | - |
-| Phase 8: Safety | 10-15 | Phase 0 | Can run with Phases 1-7 |
-| **Total** | **42-58 hrs** | - | - |
+| Phase              | Hours         | Dependencies | Parallel Opportunities        |
+| ------------------ | ------------- | ------------ | ----------------------------- |
+| Phase 0: Setup     | 1-2           | None         | -                             |
+| Phase 1: Rendering | 4-6           | Phase 0      | Can run with Phases 2-4, 6    |
+| Phase 2: Mermaid   | 3-4           | Phase 0      | Can run with Phases 1, 3-4, 6 |
+| Phase 3: Links     | 3-5           | Phase 0      | Can run with Phases 1-2, 4, 6 |
+| Phase 4: Backlinks | 3-4           | Phase 3      | Can run with Phases 1-2, 6    |
+| Phase 5: Dataview  | 10-14         | Phase 0      | Can run with Phases 1-4, 6    |
+| Phase 6: Docs      | 3-4           | All phases   | -                             |
+| Phase 7: Testing   | 4-6           | All phases   | -                             |
+| Phase 8: Safety    | 10-15         | Phase 0      | Can run with Phases 1-7       |
+| **Total**          | **42-58 hrs** | -            | -                             |
+
+**Actual Hours Used:** ~35-40 hours (some features deferred)
+
+### Deferred Items (Not Implemented)
+
+| Feature                                      | Phase   | Impact |
+| -------------------------------------------- | ------- | ------ |
+| Dataview GROUP BY                            | Phase 5 | High   |
+| Dataview Functions (sum, avg, count, length) | Phase 5 | High   |
+| Link Graph Tool (`obsidian_get_link_graph`)  | Phase 4 | Low    |
+| Dataview TASK Queries                        | Phase 5 | Low    |
+| Rate Limiting (enabled by default)           | Phase 8 | Low    |
+| CI/CD GitHub Actions                         | Phase 7 | Low    |
 
 **Critical Path:** Phase 0 → Phase 8 → Phase 5 → Phase 7 → Phase 6 (23-35 hours minimum)
 
@@ -570,36 +618,44 @@ obsidan-mcp/
 ├── CHANGELOG.md                # Change history
 ├── package.json                # Dependencies and scripts
 ├── vitest.config.ts            # Test configuration
-├── .github/
-│   └── workflows/
-│       └── test.yml          # CI/CD - runs on every commit
+│
+# CI/CD - NOT IMPLEMENTED
+# ├── .github/
+# │   └── workflows/
+# │       └── test.yml          # CI/CD - runs on every commit
+#
 ├── src/
 │   ├── MarkdownRenderer.ts     # HTML rendering
-│   ├── MermaidValidator.ts     # Mermaid validation
-│   ├── LinkExtractor.ts        # Link extraction
+│   ├── MermaidValidator.ts     # Mermaid ├── LinkExtractor.ts validation
+│          # Link extraction
 │   ├── VaultIndexer.ts        # Dataview index
-│   ├── QueryParser.ts         # Dataview parser
-│   ├── QueryExecutor.ts        # Dataview executor
+│   ├── DataviewEngine.ts       # Dataview parser + executor (combined)
 │   └── SafetyManager.ts       # Write protection, backups, logging
+│
 ├── tests/
-│   ├── unit/                  # Unit tests
-│   ├── integration/            # Integration tests
+│   ├── unit/                  # Unit tests (5 files, 20 tests)
+│   ├── integration/            # Not implemented
 │   ├── fixtures/              # Test data
 │   │   └── sample-vaults/
-│   │       ├── my-vault/      # Symlink to your real vault
-│   │       └── example-vaults/ # Downloaded community vaults
-│   └── e2e/                   # End-to-end tests
+│   │       ├── my-vault/      # Copy of daily vault
+│   │       └── example-vaults/ # Community example vaults
+│   └── e2e/                   # Not implemented
+│
 ├── docs/
 │   ├── troubleshooting.md       # Troubleshooting guide
-│   ├── config-examples.md     # Configuration examples
-│   └── api-contracts.md       # Data structures, schemas
-├── examples/
-│   └── dataview/             # Example Dataview queries
+│   ├── EXAMPLE_VAULTS_SETUP.md # Vault setup instructions
+│   ├── SAFER_VAULT_SETUP.md   # Safety-focused setup
+│   └── obsidian_mcp_tools_spec.md # Tool specifications
+│
 ├── backups/                    # File-based backups (gitignored)
 │   ├── .index.json            # Backup catalog
 │   └── {filepath}_{timestamp}.md
+│
 ├── scripts/
-│   └── test-with-inspector.sh # Manual testing script
+│   ├── test-with-inspector.sh # Manual testing script
+│   ├── setup-vaults.sh        # Vault setup automation
+│   └── start-server.sh        # Server startup
+│
 └── .gitignore                   # Git ignore patterns
 ```
 
@@ -610,38 +666,51 @@ obsidan-mcp/
 Before considering "done":
 
 **Code Quality:**
-- [ ] All unit tests pass (`npm test`)
-- [ ] Coverage ≥75% (`npm run test:coverage`)
-- [ ] TypeScript compiles without errors (`npm run build`)
-- [ ] No linting errors
-- [ ] Code follows existing patterns from base repo
+
+- [x] All unit tests pass (`npm test`)
+- [x] Coverage ≥75% (`npm run test:coverage`) - **20 tests, >75% coverage**
+- [x] TypeScript compiles without errors (`npm run build`)
+- [ ] No linting errors - **Not verified**
+- [x] Code follows existing patterns from base repo
 
 **Functionality:**
-- [ ] All tools work in MCP Inspector
-- [ ] All workflows tested with real AI (OpenCode)
-- [ ] Error messages are helpful and actionable
-- [ ] Edge cases handled (empty vault, invalid input, etc.)
+
+- [x] All tools work in MCP Inspector - **Core tools verified**
+- [x] All workflows tested with real AI (OpenCode) - **Confirmed working**
+- [ ] Error messages are helpful and actionable - **Not verified**
+- [ ] Edge cases handled (empty vault, invalid input, etc.) - **Not verified**
 
 **Documentation:**
-- [ ] README includes all new tools
-- [ ] Tool descriptions are clear for LLMs
-- [ ] Examples provided for each tool
-- [ ] Limitations documented clearly
-- [ ] Troubleshooting guide available
-- [ ] Safety features documented
+
+- [x] README includes all new tools
+- [x] Tool descriptions are clear for LLMs
+- [ ] Examples provided for each tool - **Partial**
+- [x] Limitations documented clearly
+- [x] Troubleshooting guide available
+- [x] Safety features documented
 
 **Safety:**
-- [ ] Backups tested and working
-- [ ] Conflict detection verified
-- [ ] Emergency stop tested
-- [ ] Undo functionality tested
-- [ ] Rate limiting verified (when enabled)
+
+- [x] Backups tested and working
+- [x] Conflict detection verified
+- [x] Emergency stop tested
+- [x] Undo functionality tested
+- [ ] Rate limiting verified (when enabled) - **Feature available, OFF by default**
 
 **Integration:**
-- [ ] Works with OpenCode
-- [ ] Works with Claude Desktop (tested at least once)
-- [ ] Environment variables documented
-- [ ] Example configuration provided
+
+- [x] Works with OpenCode - **Confirmed**
+- [ ] Works with Claude Desktop (tested at least once) - **Not tested**
+- [x] Environment variables documented
+- [x] Example configuration provided
+
+**⚠️ Known Limitations (Not Implemented):**
+
+- Dataview GROUP BY support
+- Dataview aggregate functions (sum, avg, count, length)
+- Link graph tool (`obsidian_get_link_graph`)
+- Full TASK query support
+- CI/CD GitHub Actions workflow
 
 ---
 
@@ -658,12 +727,12 @@ Before considering "done":
         "OBSIDIAN_REST_API_URL": "https://127.0.0.1:27124",
 
         // Safety Configuration (Optional - defaults apply)
-        "WRITE_MODE": "safe",              // "off", "safe", "confirm", "full"
+        "WRITE_MODE": "safe", // "off", "safe", "confirm", "full"
         "BACKUP_ENABLED": "true",
         "BACKUP_DIR": "/path/to/backups",
         "BACKUP_RETENTION_DAYS": "30",
         "OPERATION_LOG_RETENTION_DAYS": "30",
-        "AGENT_QUERY_WINDOW_HOURS": "168",  // 7 days
+        "AGENT_QUERY_WINDOW_HOURS": "168", // 7 days
         "CONFLICT_DETECTION": "true",
         "SYNC_AWARE_WRITES": "true",
         "SYNC_BUFFER_SECONDS": "60",
@@ -674,6 +743,216 @@ Before considering "done":
   }
 }
 ```
+
+---
+
+## 🧪 Experimental & Optional Features
+
+These features are planned but not implemented. They represent advanced capabilities for future development.
+
+### Phase 9: Semantic Search with RAG (Experimental)
+
+**Goal:** Enable agents to understand vault content semantically (meaning-based, not just keyword matching)
+
+**New Tool:** `obsidian_semantic_search`
+
+#### Why This Feature
+
+**Current limitation:** Agents can only use keyword search (`obsidian_global_search`) and link-based navigation. They lack semantic understanding.
+
+**What this adds:**
+
+- Find notes by meaning, not just exact words
+- Understand vault themes and clusters
+- Retrieve contextually relevant information
+- Enable "related notes" discovery beyond explicit links
+
+#### How It Works
+
+```
+1. Embedding Generation (One-time or Periodic)
+   All Notes → Text Chunks → Embedding API → Vector Representations
+
+2. Vector Storage
+   Vector Database (SQLite + vector extension, or file-based JSON)
+
+3. Semantic Search (Agent Query)
+   Query → Embedding → Cosine Similarity → Top-K Results
+```
+
+#### Implementation Approach
+
+**Phase 9.1: Basic Semantic Search (4-6 hours)**
+
+- [ ] Choose embedding provider:
+  - Option A: OpenAI `text-embedding-3-small` (fast, cheap)
+  - Option B: Anthropic embeddings (if available)
+  - Option C: Local `sentence-transformers` (free, CPU-bound)
+- [ ] Create `src/utils/embeddings/EmbeddingGenerator.ts`
+  - API client for chosen provider
+  - Batch embedding support
+  - Error handling and rate limiting
+- [ ] Create `src/utils/embeddings/VectorStore.ts`
+  - File-based JSON storage (simplest for MVP)
+  - Cosine similarity search
+  - CRUD operations for vectors
+- [ ] Implement background indexing:
+  - Scan vault on startup
+  - Split notes into chunks (512-1024 tokens)
+  - Generate embeddings
+  - Store with metadata (path, chunk_id, timestamp)
+- [ ] Implement `obsidian_semantic_search` tool:
+  - Input: `{ query, top_k?, filters? }`
+  - Output: Ranked results with similarity scores
+  - Format:
+    ```json
+    {
+      "results": [
+        {
+          "note": "projects/24-summber/my-python-module-vocaloid/developing-guide.md",
+          "score": 0.92,
+          "snippet": "... relevant text snippet ..."
+        }
+      ]
+    }
+    ```
+- [ ] Unit tests for embedding generation and similarity search
+- [ ] Commit: `feat(experimental): add semantic search with embeddings`
+
+**Phase 9.2: Persistent Vector Storage (2-3 hours)**
+
+- [ ] Switch to SQLite with `sqlite-vec` extension
+  - Efficient storage for large vaults
+  - Faster similarity search
+- [ ] Implement delta updates:
+  - Track file modification times
+  - Only re-index changed files
+  - Delete embeddings for removed files
+- [ ] Add configuration options:
+  - Embedding provider selection
+  - Chunk size and overlap
+  - Indexing schedule (on-demand vs. periodic)
+- [ ] Commit: `feat(experimental): add SQLite vector storage with delta updates`
+
+**Phase 9.3: Advanced Features (3-4 hours)**
+
+- [ ] Hybrid search: Keyword + semantic fusion
+  - Combine `obsidian_global_search` with semantic search
+  - Weighted ranking (tunable)
+- [ ] Query expansion:
+  - Rephrase queries for better recall
+  - Add related terms from top results
+- [ ] Vault summarization:
+  - Topic clustering of embeddings
+  - Identify main themes automatically
+- [ ] Commit: `feat(experimental): add hybrid search and topic clustering`
+
+#### Dependencies
+
+- Phase 0 (basic infrastructure)
+- External API key (OpenAI/Anthropic) or local model (Ollama/sentence-transformers)
+
+#### Deliverables
+
+- Working semantic search tool
+- Background indexing process
+- Persistent vector storage
+- Configuration for embedding provider
+
+#### Usage Examples
+
+**Agent Query:**
+
+```
+"What notes discuss the relationship between psychology and technology?"
+```
+
+**Current (Keyword Search):**
+
+```typescript
+obsidian_global_search("psychology technology");
+// Returns: notes containing both words (may miss nuanced discussions)
+```
+
+**With Semantic Search:**
+
+```typescript
+obsidian_semantic_search({
+  query: "relationship between psychology and technology",
+  top_k: 10,
+});
+// Returns: notes about human-AI interaction, digital mental health, etc.
+```
+
+#### Benefits for Agents
+
+| Capability           | Without Embeddings | With Embeddings      |
+| -------------------- | ------------------ | -------------------- |
+| Find similar notes   | Keyword match only | Semantic similarity  |
+| Understand themes    | Manual exploration | Automatic clustering |
+| Context retrieval    | File-by-file       | Top-K ranked results |
+| Query flexibility    | Exact matching     | Natural language     |
+| Connection discovery | Link-based only    | Meaning-based links  |
+
+#### Configuration Example
+
+```json
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "node /path/to/obsidan-mcp/dist/index.js",
+      "env": {
+        // ... existing config ...
+
+        // Semantic Search Configuration (Optional)
+        "SEMANTIC_SEARCH_ENABLED": "false", // Default OFF, opt-in only
+        "EMBEDDING_PROVIDER": "openai", // "openai", "anthropic", "local"
+        "EMBEDDING_MODEL": "text-embedding-3-small",
+        "EMBEDDING_API_KEY": "your-api-key",
+        "CHUNK_SIZE": "512", // Tokens per chunk
+        "CHUNK_OVERLAP": "64", // Overlap between chunks
+        "VECTOR_STORE_PATH": "/path/to/vectors.db",
+        "INDEX_ON_STARTUP": "true"
+      }
+    }
+  }
+}
+```
+
+#### Considerations
+
+**Pros:**
+
+- ✅ High value for agent understanding
+- ✅ Enables true semantic vault comprehension
+- ✅ Flexible (can switch providers)
+- ✅ Can be opt-in only (disabled by default)
+
+**Cons:**
+
+- ❌ Requires external API or local model
+- ❌ Initial indexing time (one-time cost)
+- ❌ Storage overhead (vectors for all notes)
+- ❌ API costs (if using cloud provider)
+
+**Estimated API Costs (OpenAI):**
+
+- Small vault (500 notes): ~$0.10 (one-time)
+- Medium vault (2000 notes): ~$0.40 (one-time)
+- Large vault (10k notes): ~$2.00 (one-time)
+- Queries: Negligible (~$0.001 per 1K queries)
+
+#### References & Inspiration
+
+- [Obsidian Copilot: Search and Knowledge Retrieval](https://deepwiki.com/logancyang/obsidian-copilot/5-search-and-knowledge-retrieval) - Guide on semantic search implementation for Obsidian
+
+#### Status
+
+**Phase 9.1:** Not started (Experimental - 4-6 hours)
+**Phase 9.2:** Not started (Experimental - 2-3 hours)
+**Phase 9.3:** Not started (Experimental - 3-4 hours)
+
+**Total Estimated Time:** 9-13 hours
 
 ---
 

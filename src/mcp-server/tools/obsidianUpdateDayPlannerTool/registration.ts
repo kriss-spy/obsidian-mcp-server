@@ -1,33 +1,28 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ObsidianRestApiService } from "../../../services/obsidianRestAPI/index.js";
-import { VaultCacheService } from "../../../services/obsidianRestAPI/vaultCache/index.js";
-import { ObsidianCdpService } from "../../../services/obsidianCdp/index.js";
 import {
   ErrorHandler,
-  logger,
   RequestContext,
   requestContextService,
 } from "../../../utils/index.js";
 import {
-  ObsidianDataviewInputSchema,
-  processObsidianDataview,
+  ObsidianUpdateDayPlannerInputSchema,
+  processObsidianUpdateDayPlanner,
 } from "./logic.js";
 
-export const registerObsidianDataviewTool = async (
+export const registerObsidianUpdateDayPlannerTool = async (
   server: McpServer,
   obsidianService: ObsidianRestApiService,
-  vaultCacheService: VaultCacheService | undefined,
-  cdpService: ObsidianCdpService | undefined,
 ): Promise<void> => {
-  const toolName = "obsidian_execute_dataview";
+  const toolName = "obsidian_update_day_planner";
   const toolDescription =
-    "Executes a Dataview query against the vault. If CDP is enabled, it uses the native Dataview API for full DQL/DataviewJS support. Otherwise, it uses a simplified local parser. Supports LIST and TABLE queries, FROM filters, WHERE clauses, and SORT. Useful for finding and organizing notes based on metadata/properties.";
+    "Updates the '## Day planner' section in a specific daily note. It formats tasks as time-blocks (HH:mm - HH:mm) in a 24h format. Only edits the daily note; it does not move or copy tasks from other files. Useful for physically planning your day in your journal.";
 
   const registrationContext: RequestContext =
     requestContextService.createRequestContext({
-      operation: "RegisterObsidianDataviewTool",
+      operation: "RegisterObsidianUpdateDayPlannerTool",
       toolName: toolName,
-      module: "ObsidianDataviewRegistration",
+      module: "ObsidianUpdateDayPlannerRegistration",
     });
 
   await ErrorHandler.tryCatch(
@@ -35,30 +30,28 @@ export const registerObsidianDataviewTool = async (
       server.tool(
         toolName,
         toolDescription,
-        ObsidianDataviewInputSchema.shape,
+        ObsidianUpdateDayPlannerInputSchema.shape,
         async (params) => {
           const handlerContext: RequestContext =
             requestContextService.createRequestContext({
               parentContext: registrationContext,
-              operation: "HandleObsidianDataviewRequest",
+              operation: "HandleObsidianUpdateDayPlannerRequest",
               toolName: toolName,
               params,
             });
 
           return await ErrorHandler.tryCatch(
             async () => {
-              const response = await processObsidianDataview(
+              const response = await processObsidianUpdateDayPlanner(
                 params,
                 handlerContext,
                 obsidianService,
-                vaultCacheService,
-                cdpService,
               );
               return {
                 content: [
                   { type: "text", text: JSON.stringify(response, null, 2) },
                 ],
-                isError: false,
+                isError: !response.success,
               };
             },
             {
